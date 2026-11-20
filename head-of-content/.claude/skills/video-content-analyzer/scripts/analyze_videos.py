@@ -34,7 +34,7 @@ try:
 except ImportError:
     pass
 
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
 
 # Platform-specific field mappings
 PLATFORM_MAPPINGS = {
