@@ -66,7 +66,7 @@ def fetch_profiles(client: 'ApifyClient', usernames: list[str]) -> dict[str, dic
     run = client.actor("apify/instagram-profile-scraper").call(run_input=run_input)
 
     profiles = {}
-    for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+    for item in client.dataset(run["defaultDatasetId"] if isinstance(run, dict) else run.default_dataset_id).iterate_items():
         username = item.get('username', '').lower()
         if username:
             profiles[username] = {
@@ -136,7 +136,7 @@ def fetch_instagram(
 
     # Fetch results and merge profile data
     items = []
-    for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+    for item in client.dataset(run["defaultDatasetId"] if isinstance(run, dict) else run.default_dataset_id).iterate_items():
         # Merge follower count from profile data
         owner_username = (item.get('ownerUsername', '') or '').lower()
         if owner_username and owner_username in profiles:

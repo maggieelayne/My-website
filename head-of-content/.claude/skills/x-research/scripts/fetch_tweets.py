@@ -96,7 +96,7 @@ def fetch_tweets(
 
     # Fetch results
     tweets = []
-    for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+    for item in client.dataset(run["defaultDatasetId"] if isinstance(run, dict) else run.default_dataset_id).iterate_items():
         tweets.append(item)
 
     print(f"Fetched {len(tweets)} tweets total")

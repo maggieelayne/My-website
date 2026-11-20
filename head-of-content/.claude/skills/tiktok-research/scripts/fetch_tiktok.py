@@ -98,7 +98,7 @@ def fetch_tiktok(
 
     # Fetch results
     items = []
-    for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+    for item in client.dataset(run["defaultDatasetId"] if isinstance(run, dict) else run.default_dataset_id).iterate_items():
         # Normalize field names for consistency with analysis script
         normalized = {
             'id': item.get('id'),
