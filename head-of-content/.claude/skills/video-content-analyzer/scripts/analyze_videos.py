@@ -216,13 +216,29 @@ def analyze_video(client, video_source, caption: str) -> dict:
     """Analyze video with Gemini."""
     prompt = VIDEO_ANALYSIS_PROMPT.format(caption=caption[:1000] if caption else "No caption")
 
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=[video_source, prompt],
-        config=types.GenerateContentConfig(
-            response_modalities=["TEXT"],
-        ),
-    )
+    # A plain URL string is sent as text, so Gemini never sees the video.
+    # Wrap URLs as file parts so the video itself is analyzed.
+    if isinstance(video_source, str):
+        video_source = types.Part.from_uri(file_uri=video_source, mime_type="video/mp4")
+
+    response = None
+    for attempt in range(4):
+        try:
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=[video_source, prompt],
+                config=types.GenerateContentConfig(
+                    response_modalities=["TEXT"],
+                ),
+            )
+            break
+        except Exception as e:
+            busy = any(code in str(e) for code in ("429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"))
+            if not busy or attempt == 3:
+                raise
+            wait = 30 * (attempt + 1)
+            print(f"    Gemini busy or rate limited, retrying in {wait}s...")
+            time.sleep(wait)
 
     if response.candidates and response.candidates[0].content:
         for part in response.candidates[0].content.parts:
@@ -301,10 +317,10 @@ def analyze_videos(outliers: list[dict], platform: str = "instagram", max_videos
                     hook = analysis.get('hook', {}).get('technique', 'analyzed')
                     print(f"    Done: {hook}")
                     results.append(result)
-                    time.sleep(2)
+                    time.sleep(13)  # free tier allows 5 requests per minute
                     continue
-            except Exception:
-                print(f"    Direct URL failed, trying upload...")
+            except Exception as e:
+                print(f"    Direct URL failed ({str(e)[:80]}), trying upload...")
 
             # Fallback: download and upload
             video_bytes = download_video(video_url)
