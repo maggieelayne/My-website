@@ -4,6 +4,7 @@ Add accounts below to track for research. The fetch script will pull content fro
 
 About me: @elayneink, PMU / fine line artist specializing in brows and lips.
 Goal: more bookings from luxury clients now; trainings and courses later.
+Content mix: mostly client-getting posts (about 5 of 7 per week), sprinkled with client education (about 2 of 7). Every client post ends with a DM keyword.
 Comfortable filming any format.
 
 | Username | Niche | Notes |
